@@ -1,0 +1,45 @@
+
+# Java
+*.class
+*.log
+*.jar
+*.war
+target/
+out/
+
+# Maven
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+application-local.yaml
+application-local.properties
+
+# Operating system
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node.js
+node_modules/
+dist/
+build/
+coverage/
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
