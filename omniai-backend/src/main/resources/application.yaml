@@ -15,3 +15,8 @@
 
   flyway:
     enabled: true
+
+app:
+  security:
+    username: ${APP_SECURITY_USERNAME}
+    password: ${APP_SECURITY_PASSWORD}

@@ -12,6 +12,9 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import com.omniai.exception.EndpointConflictException;
+import com.omniai.exception.EndpointNotFoundException;
+
 @Service
 public class EndpointService {
 
@@ -27,8 +30,8 @@ public class EndpointService {
 
         endpointRepository.findByHostname(endpoint.getHostname())
                 .ifPresent(existing -> {
-                    throw new IllegalArgumentException(
-                            "Já existe um computador com esse hostname."
+                   throw new EndpointConflictException(
+                     "Já existe um computador com esse hostname."
                     );
                 });
 
@@ -37,9 +40,9 @@ public class EndpointService {
 
             endpointRepository.findBySerialNumber(endpoint.getSerialNumber())
                     .ifPresent(existing -> {
-                        throw new IllegalArgumentException(
-                                "Já existe um computador com esse número de série."
-                        );
+                       throw new EndpointConflictException(
+                       "Já existe um computador com esse número de série."
+                     );
                     });
         }
 
@@ -56,18 +59,18 @@ public class EndpointService {
     @Transactional(readOnly = true)
     public Endpoint findById(UUID id) {
         return endpointRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Computador não encontrado."
-                ));
+                .orElseThrow(() -> new EndpointNotFoundException(
+                     "Computador não encontrado."
+                    ));
     }
 
     // Buscar computador pelo hostname
     @Transactional(readOnly = true)
     public Endpoint findByHostname(String hostname) {
         return endpointRepository.findByHostname(hostname)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Computador não encontrado."
-                ));
+               .orElseThrow(() -> new EndpointNotFoundException(
+                   "Computador não encontrado."
+                   ));
     }
 
     // Filtrar computadores pelo status
