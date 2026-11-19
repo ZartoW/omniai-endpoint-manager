@@ -4,6 +4,8 @@ package com.omniai.service;
 import com.omniai.entity.Endpoint;
 import com.omniai.entity.EndpointStatus;
 import com.omniai.repository.EndpointRepository;
+import com.omniai.exception.EndpointConflictException;
+import com.omniai.exception.EndpointNotFoundException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,9 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-
-import com.omniai.exception.EndpointConflictException;
-import com.omniai.exception.EndpointNotFoundException;
 
 @Service
 public class EndpointService {
@@ -28,21 +27,23 @@ public class EndpointService {
     @Transactional
     public Endpoint create(Endpoint endpoint) {
 
+        // Verificar hostname duplicado
         endpointRepository.findByHostname(endpoint.getHostname())
                 .ifPresent(existing -> {
-                   throw new EndpointConflictException(
-                     "Já existe um computador com esse hostname."
+                    throw new EndpointConflictException(
+                            "Já existe um computador com esse hostname."
                     );
                 });
 
+        // Verificar número de série duplicado
         if (endpoint.getSerialNumber() != null &&
                 !endpoint.getSerialNumber().isBlank()) {
 
             endpointRepository.findBySerialNumber(endpoint.getSerialNumber())
                     .ifPresent(existing -> {
-                       throw new EndpointConflictException(
-                       "Já existe um computador com esse número de série."
-                     );
+                        throw new EndpointConflictException(
+                                "Já existe um computador com esse número de série."
+                        );
                     });
         }
 
@@ -60,17 +61,17 @@ public class EndpointService {
     public Endpoint findById(UUID id) {
         return endpointRepository.findById(id)
                 .orElseThrow(() -> new EndpointNotFoundException(
-                     "Computador não encontrado."
-                    ));
+                        "Computador não encontrado."
+                ));
     }
 
     // Buscar computador pelo hostname
     @Transactional(readOnly = true)
     public Endpoint findByHostname(String hostname) {
         return endpointRepository.findByHostname(hostname)
-               .orElseThrow(() -> new EndpointNotFoundException(
-                   "Computador não encontrado."
-                   ));
+                .orElseThrow(() -> new EndpointNotFoundException(
+                        "Computador não encontrado."
+                ));
     }
 
     // Filtrar computadores pelo status
@@ -85,6 +86,29 @@ public class EndpointService {
 
         Endpoint endpoint = findById(id);
 
+        // Verificar se outro computador utiliza o hostname
+        endpointRepository.findByHostname(updatedEndpoint.getHostname())
+                .filter(existing -> !existing.getId().equals(id))
+                .ifPresent(existing -> {
+                    throw new EndpointConflictException(
+                            "Já existe um computador com esse hostname."
+                    );
+                });
+
+        // Verificar se outro computador utiliza o número de série
+        if (updatedEndpoint.getSerialNumber() != null &&
+                !updatedEndpoint.getSerialNumber().isBlank()) {
+
+            endpointRepository.findBySerialNumber(updatedEndpoint.getSerialNumber())
+                    .filter(existing -> !existing.getId().equals(id))
+                    .ifPresent(existing -> {
+                        throw new EndpointConflictException(
+                                "Já existe um computador com esse número de série."
+                        );
+                    });
+        }
+
+        // Atualizar os dados
         endpoint.setHostname(updatedEndpoint.getHostname());
         endpoint.setSerialNumber(updatedEndpoint.getSerialNumber());
         endpoint.setOperatingSystem(updatedEndpoint.getOperatingSystem());
